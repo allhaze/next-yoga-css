@@ -1,0 +1,45 @@
+{
+  "name": "next-nano-css",
+  "version": "1.0.0",
+  "description": "Next.js CSS-in-JS",
+  "main": "index.js",
+  "files": [
+    "index.js",
+    "utils.js",
+    "plugin.js",
+    "components.js"
+  ],
+  "scripts": {
+    "clean": "rimraf dist",
+    "babel-version": "babel --version",
+    "build": "babel index.js --out-dir dist --copy-files --source-maps",
+    "prepublishOnly": "babel index.js --out-dir dist --copy-files --source-maps"
+  },
+  "keywords": [
+    "webpack",
+    "webpack 5",
+    "browser",
+    "plugin",
+    "extension",
+    "cssinjs"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/allhaze/next-nano-css.git"
+  },
+  "author": "Vova Vlasyuk <allhaze.team@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/allhaze/next-nano-css#readme",
+  "devDependencies": {
+    "@babel/core": "7.0.0-beta.46",
+    "@babel/preset-env": "7.0.0-beta.46",
+    "babel-cli": "6.26.0",
+    "babel-loader": "8.2.2",
+    "react": "17.0.2",
+    "webpack": "5.31.0"
+  },
+  "dependencies": {
+    "nano-css": "5.3.1",
+    "json-bump": "0.1.3"
+  }
+}

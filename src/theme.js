@@ -201,6 +201,7 @@ const _normalizeRules = (style) => {
         if([
             'zIndex',
             'textShadow',
+            '-webkit-line-clamp',
             'flex', 
             'fontWeight',
             'color', 

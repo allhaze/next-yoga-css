@@ -14,11 +14,12 @@ require('nano-css/addon/rule').addon(nano);
 require('nano-css/addon/global').addon(nano);
 require('nano-css/addon/sheet').addon(nano);
 
-const { sheet, rule, keyframes } = nano;
+const { sheet, rule, keyframes, put } = nano;
 
 module.exports = {
     nano,
     keyframes,
     sheet,
     rule,
+    put,
 };

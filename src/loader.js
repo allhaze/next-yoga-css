@@ -7,7 +7,7 @@ const { registerTheme, generate, registerStyles, hash, getRegisteredClasses, get
 
 require('nano-css/addon/extract').addon(nano);
 
-const regExFindStyles = /(\(theme\)\=\>\(\{[^\)]*\}\))/g,
+const regExFindStyles = /(?<=\(theme\)\=\>\(\{).*?(?=\}\))/g,
     regExFindViewStyle = /(style\=\{[^\}]*\})/g,
     regExStyles = /(?<=styles\.)(.*?)(?=\,|\]|\})/g,
     regExComments = /[^:]\/\/.*/g;
@@ -85,19 +85,19 @@ module.exports = function loader(content) {
                     );
                 }, () => {
                     executeForViews(content, stylesHash, this, options, false, (cnt) => {
-                        fs.writeFile(path.resolve(options.basePath, options.outputCSSFile), generate(nano), 'utf-8', () => {});
+                        fs.writeFile(path.resolve(options.basePath, options.outputCSSFile), generate(nano, options), 'utf-8', () => {});
                         callback(null, cnt);
                     });
                 });
             });
 
         } else {
-            fs.writeFile(path.resolve(options.basePath, options.outputCSSFile), generate(nano), 'utf-8', () => {});
+            fs.writeFile(path.resolve(options.basePath, options.outputCSSFile), generate(nano, options), 'utf-8', () => {});
             callback(null, content);
             return;
         }
     } else {
-        fs.writeFile(path.resolve(options.basePath, options.outputCSSFile), generate(nano), 'utf-8', () => {});
+        fs.writeFile(path.resolve(options.basePath, options.outputCSSFile), generate(nano, options), 'utf-8', () => {});
         callback(null, content);
     }
 };
@@ -191,7 +191,7 @@ const executeForStyles = (content, resource) => {
     let stylesHash;
     if(match && match[0]) {
         match[0] = match[0].replace(/(\@keyframes)/g, "\@keyframes ");
-        const styles = eval(match[0]);
+        const styles = eval(`(theme)=>({ ${match[0]} })`);
         stylesHash = hash(match[0]);
         registerStyles(stylesHash, styles, resource);
     }
@@ -208,7 +208,7 @@ const executeForGlobalStyles = (content, stylesName) => {
     const source = cleanAndClear(content);
     const match = source.match(regExFindStyles);
     if(match && match[0]) {
-        const registerGlobalStylesArguments = eval('["' + stylesName + '",' + match[0] + ']');
+        const registerGlobalStylesArguments = eval('["' + stylesName + '",' + `(theme)=>({ ${match[0]} })` + ']');
         registerGlobalStyles(...registerGlobalStylesArguments);
     }
 };

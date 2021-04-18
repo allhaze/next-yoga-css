@@ -1,4 +1,4 @@
-const { rule } = require('./nano');
+const { rule, put } = require('./nano');
 
 const _registeredThemes = {},
     _registeredStyles = {},
@@ -7,7 +7,7 @@ const _registeredThemes = {},
     _registeredClasses = {},
     _resourceNameToHash = {};
 
-let _projector;
+let _projector, _rtl;
 const getThemeProjector = () => {
     if(typeof _projector === 'undefined') {
         _projector = new Proxy({}, {
@@ -51,7 +51,7 @@ const registerStyles = (stylesHash, stylesValues, resource) => {
         log('Registered styles: [' + stylesHash + ']');
         if(typeof _registeredClasses[stylesHash] === 'undefined') {
             _registeredClasses[stylesHash] = {};
-        } 
+        }    
         const themeProjector = getThemeProjector();
         const styles = stylesValues(themeProjector);
         for(let styleKey in styles) {
@@ -109,8 +109,13 @@ const getRegisteredGlobalClasses = () => {
 
 let _processed = [];
 
-const generate = (nano) => {
+const generate = (nano, options) => {
     
+    if(options.withRtl && !_rtl) {
+        const __rtl = require('rtl-css-js');
+        _rtl = __rtl.default || __rtl;
+    }
+
     for(let themeName in _registeredThemes) {
         for(let stylesHash in _registeredStyles) {
             const styles = _registeredStyles[stylesHash](getTheme(themeName));
@@ -119,7 +124,12 @@ const generate = (nano) => {
                     _processed.push(`${styleKey}|${stylesHash}~${themeName}`);
                     _normalizeRules(styles[styleKey]);
                     let themeKey = themeName === 'default' ? '' : `${themeName}_`;
-                    rule(styles[styleKey], `${themeKey}${_registeredClasses[stylesHash][styleKey]}`);
+                    if(options.withRtl) {
+                        put(`body[dir=ltr] .${nano.pfx}${themeKey}${_registeredClasses[stylesHash][styleKey]}`, styles[styleKey]);
+                        put(`body[dir=rtl] .${nano.pfx}${themeKey}${_registeredClasses[stylesHash][styleKey]}`, _rtl(styles[styleKey]));
+                    } else {
+                        rule(styles[styleKey], `${themeKey}${_registeredClasses[stylesHash][styleKey]}`);
+                    }
                 }
             }
         }
@@ -131,7 +141,12 @@ const generate = (nano) => {
                     _processed.push(`${styleKey}$${globalStylesKey}~${themeName}`);
                     _normalizeRules(styles[styleKey]);
                     let themeKey = themeName === 'default' ? '' : `${themeName}_`;
-                    rule(styles[styleKey], `${themeKey}${_registeredGlobalClasses[globalStylesKey][styleKey]}`);
+                    if(options.withRtl) {
+                        put(`body[dir=ltr] .${nano.pfx}${themeKey}${_registeredGlobalClasses[globalStylesKey][styleKey]}`, styles[styleKey]);
+                        put(`body[dir=rtl] .${nano.pfx}${themeKey}${_registeredGlobalClasses[globalStylesKey][styleKey]}`, _rtl(styles[styleKey]));
+                    } else {
+                        rule(styles[styleKey], `${themeKey}${_registeredGlobalClasses[globalStylesKey][styleKey]}`);
+                    }
                 }
             }
         }
@@ -218,12 +233,20 @@ const _normalizeRules = (style) => {
             'borderRightColor',
             'animationDuration', 
             'animationName',
+            'transform',
             'opacity'
         ].indexOf(key) > -1) {
             continue;
         }
 
-        if(key === 'paddingHorizontal') {
+        if(key.indexOf('~~') > -1) {
+            let __style_ = Object.assign({}, style[key]);
+            let newKey = key.replace('~~', ' ');
+            style[newKey] = __style_;
+
+            delete style[key];
+            _normalizeRules(style[newKey]);
+        } else if(key === 'paddingHorizontal') {
 
             style['paddingLeft'] = _normalizeValue(__styles[key]);
             style['paddingRight'] = _normalizeValue(__styles[key]);

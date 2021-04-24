@@ -283,9 +283,15 @@ const _normalizeValue = (value) => {
         value = value.toString();
     }
     if(typeof value === 'string') {
-        value = value.replace(/\d*\.?\d+(?:px|vh|vw|%|em|rem|pt)?/ig, (match) => {
-            return /(px|%|vh|vw|em|rem|pt)/ig.test(match) ? match : `${match}px`;
-        });
+        if(value.indexOf('calc(') > -1) {
+            value = value.replace(/\-|\+/g, (match) => {
+                return ` ${match} `;
+            });
+        } else {
+            value = value.replace(/\d*\.?\d+(?:px|vh|vw|%|em|rem|pt)?/ig, (match) => {
+                return /(px|%|vh|vw|em|rem|pt)/ig.test(match) ? match : `${match}px`;
+            });
+        }
     } 
     return value;
 };

@@ -3,7 +3,7 @@
 ## Installation
 
 ```
-yarn add next-yoga-css
+yarn add https://github.com/allhaze/next-yoga-css
 ```
 
 ## Usage
@@ -24,5 +24,6 @@ module.exports = withYogaCss({
 You can add the following custom options to modify the behaviour of plugin.
 
 1. `logging`: Enables the debug logs (set this flag to **true**).
+2. `withRtl`: Enables the right-to-left styles.
 
 TBD.

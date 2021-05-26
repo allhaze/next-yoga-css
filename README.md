@@ -1,4 +1,4 @@
-# 📦 Webpack plugin for nextjs (CSS in JS)
+# 📦 [experimental] Webpack plugin for nextjs (CSS in JS)
 
 ## Installation
 
